@@ -57,7 +57,7 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
 
   const enrich = {
     ...(process.env.APP_ENV && { APP_ENV: process.env.APP_ENV }),
-    ...(process.env.HOTNAME && { HOSTNAME: process.env.HOSTNAME }),
+    ...(process.env.HOSTNAME && { HOSTNAME: process.env.HOSTNAME }),
     ...(process.env.NODE_ENV && { NODE_ENV: process.env.NODE_ENV }),
   };
 
