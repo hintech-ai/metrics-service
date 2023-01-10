@@ -1,15 +1,15 @@
-import url from "node:url";
-import { Buffer } from "node:buffer";
-import https from "node:https"
-import { format } from "./utils.js";
+const url = require('url')
+const Buffer = require('buffer')
+const https = require('https')
+const format = require('./utils.js').format
 
 const client = undefined;
 const socket = undefined;
 
 const getClient = () => {
-  const host = process.env.METRIC_HOST;
+  const host = process.env.METRICS_HOST;
   if (host) {
-    const dsn = new URL(process.env.METRIC_HOST);
+    const dsn = url.parse(process.env.METRICS_HOST);
 
     if (dsn.protocol == "udp:") {
       return (message) => {
@@ -61,4 +61,4 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
     client(format(mesurement, fields, tags, timestamp))
 };
 
-export { sendMetric };
+module.exports = sendMetric

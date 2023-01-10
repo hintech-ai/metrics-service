@@ -13,7 +13,9 @@ const format = function (mesurement, fields, tags = {}, timestamp = undefined) {
   let unescaped_fields_keys = Object.keys(fields) || [];
   for (let i = 0; i < unescaped_fields_keys.length; i++) {
     escaped_fields_array.push(
-      escapeString(unescaped_fields_keys[i]) + "=" + fields[unescaped_fields_keys[i]]
+      escapeString(unescaped_fields_keys[i]) +
+        "=" +
+        fields[unescaped_fields_keys[i]]
     );
   }
   let escaped_fields_str = escaped_fields_array.join(",");
@@ -54,4 +56,4 @@ const escapeString = function (str) {
     .join("");
 };
 
-export {format};
+module.exports = { format };
