@@ -1,3 +1,3 @@
 const sendMetric = require('./index.js')
 
-sendMetric('test_metric', {value: 1})
+sendMetric('other_metric', {value: 1})
