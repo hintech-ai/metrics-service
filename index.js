@@ -64,12 +64,12 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
   const globalTags = Object.keys(process.env)
     .filter((key) => key.includes("GLOBAL_METRIC_"))
     .reduce((cur, key) => {
-      return Object.assign(cur, { [key.replace('GLOBAL_METRIC_', '')]: process.env[key] });
+      return Object.assign(cur, {
+        [key.replace("GLOBAL_METRIC_", "")]: process.env[key],
+      });
     }, {});
 
-    tags = { ...enrich, ...globalTags, ...tags };
-    
-    console.log(tags)
+  tags = { ...enrich, ...globalTags, ...tags };
 
   const message = format(mesurement, fields, tags, timestamp);
   console.log(message);
