@@ -45,6 +45,9 @@ const isObject = function (obj) {
 };
 
 const escapeString = function (str) {
+  if (!str)
+    return ""
+  
   return str
     .split("")
     .map(function (character) {
