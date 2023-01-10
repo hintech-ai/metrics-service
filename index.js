@@ -1,7 +1,7 @@
-const url = require('url')
-const Buffer = require('buffer')
-const https = require('https')
-const format = require('./utils.js').format
+const url = require("url");
+const Buffer = require("buffer");
+const https = require("https");
+const format = require("./utils.js").format;
 
 const client = undefined;
 const socket = undefined;
@@ -23,8 +23,7 @@ const getClient = () => {
         });
       };
     } else if (dsn.protocol == "https:") {
-        return (message) => {
-          console.log(message)
+      return (message) => {
         const options = {
           hostname: dsn.hostname,
           path: dsn.pathname,
@@ -34,8 +33,7 @@ const getClient = () => {
           },
         };
 
-        const req = https.request(options, (res) => {
-        });
+        const req = https.request(options, (res) => {});
 
         req.on("error", (e) => {
           console.error(e);
@@ -56,9 +54,26 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
     console.debug("No client configured");
     return;
   }
+
+  const enrich = {
+    ...(process.env.APP_ENV && { APP_ENV: process.env.APP_ENV }),
+    ...(process.env.HOTNAME && { HOSTNAME: process.env.HOSTNAME }),
+    ...(process.env.NODE_ENV && { NODE_ENV: process.env.NODE_ENV }),
+  };
+
+  const globalTags = Object.keys(process.env)
+    .filter((key) => key.includes("GLOBAL_METRIC_"))
+    .reduce((cur, key) => {
+      return Object.assign(cur, { [key]: process.env[key] });
+    }, {});
+
+    tags = { ...enrich, ...globalTags, ...tags };
     
-    
-    client(format(mesurement, fields, tags, timestamp))
+    console.log(tags)
+
+  const message = format(mesurement, fields, tags, timestamp);
+  console.log(message);
+  client(message);
 };
 
-module.exports = sendMetric
+module.exports = sendMetric;

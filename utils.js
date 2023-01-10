@@ -28,7 +28,7 @@ const format = function (mesurement, fields, tags = {}, timestamp = undefined) {
 
   let esapedTagsArray = [];
   for (let tagKey in tags) {
-    esapedTagsArray.push(escapeString(tagKey), escapeString(tags[tagKey]));
+    esapedTagsArray.push(escapeString(tagKey)+'='+escapeString(tags[tagKey]));
   }
   escapeTags = esapedTagsArray.join(",");
 
