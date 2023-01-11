@@ -1,58 +1,132 @@
-const format = function (mesurement, fields, tags = {}, timestamp = undefined) {
-  if (!mesurement || typeof mesurement !== "string") {
-    throw new Error("Measurement should be string");
+'use strict';
+
+
+var SPACE_REPLACER = [new RegExp(' ', 'gi'), '\\ '];
+var COMMA_REPLACER = [new RegExp(',', 'gi'), '\\,'];
+var EQUAL_REPLACER = [new RegExp('=', 'gi'), '\\='];
+
+var FIELD_TAG_REPLACERS = [
+  SPACE_REPLACER,
+  COMMA_REPLACER,
+  EQUAL_REPLACER
+];
+
+var MEASURE_REPLACERS = [
+  SPACE_REPLACER,
+  COMMA_REPLACER
+];
+
+
+/**
+ * Certain chars need to be escaped for certain string portions.
+ * This function will escape the required items for a given input string
+ *
+ * @param  {Array}  replacers
+ * @param  {String} input
+ * @return {String}
+ */
+function escapeChars (replacers, input) {
+  for (var r in replacers) {
+    input = input.replace(replacers[r][0], replacers[r][1]);
   }
 
-  mesurement = escapeString(mesurement);
+  return input;
+}
 
-  if (!fields || !isObject(fields)) {
-    throw new Error("Fields should be an object");
+
+/**
+ * Creates a tag or value string that can be incldued in a complete InfluxDB
+ * line protocol string
+ * @param  {Array}  keys
+ * @param  {Object} data
+ * @return {String}
+ */
+const generateTagString = function (data, keys) {
+  var ret = '';
+
+  // Keys can be provided. If not we assume all keys are required
+  keys = keys || Object.keys(data);
+
+  if (keys.length > 0) {
+    for (var i in keys) {
+      ret +=
+        escapeChars(FIELD_TAG_REPLACERS, keys[i]) +
+        '=' +
+        escapeChars(FIELD_TAG_REPLACERS, data[keys[i]]) +
+        ',';
+    }
+
+    ret = ret.slice(0, -1);
   }
 
-  let escaped_fields_array = [];
-  let unescaped_fields_keys = Object.keys(fields) || [];
-  for (let i = 0; i < unescaped_fields_keys.length; i++) {
-    escaped_fields_array.push(
-      escapeString(unescaped_fields_keys[i]) +
-        "=" +
-        fields[unescaped_fields_keys[i]]
-    );
-  }
-  let escaped_fields_str = escaped_fields_array.join(",");
-
-  let escapeTags = "";
-
-  if (!isObject(tags)) {
-    throw new Error("tags if provied should be an object");
-  }
-
-  let esapedTagsArray = [];
-  for (let tagKey in tags) {
-    esapedTagsArray.push(escapeString(tagKey)+'='+escapeString(tags[tagKey]));
-  }
-  escapeTags = esapedTagsArray.join(",");
-
-  timestamp = timestamp || process.hrtime.bigint();
-
-  let data = `${mesurement}${
-    escapeTags.length > 0 ? "," + escapeTags : ""
-  } ${escaped_fields_str} ${timestamp}`;
-
-  return data;
+  return ret;
 };
 
-const isObject = function (obj) {
-  let type = typeof obj;
-  return type === "function" || (type === "object" && !!obj);
+
+/**
+ * Creates a string of field values
+ * @param  {Array}  keys
+ * @param  {Object} data
+ * @return {String}
+ */
+const generateFieldString = function (data, keys) {
+  var ret = '';
+
+  // Keys can be provided. If not we assume all keys are required
+  keys = keys || Object.keys(data);
+
+  if (keys.length > 0) {
+    for (var i in keys) {
+      ret += escapeChars(FIELD_TAG_REPLACERS, keys[i]) +
+        '=' +
+        data[keys[i]] +
+        ',';
+    }
+
+    ret = ret.slice(0, -1);
+  }
+
+  return ret;
 };
 
-const escapeString = function (str) {
-  if (!str)
-    return ""
-  
-  str.replaceAll(' ', "\\ ").replaceAll(',', "\\,").replaceAll("\n", "")
 
-  return str;
+/**
+ * Generates a line protocol string from provided inputs
+ * @param  {String} m  measurement name
+ * @param  {String} t  tags
+ * @param  {String} f  fields
+ * @param  {String} ts [timestamp]
+ * @return {String}
+ */
+const generateLineProtocolString = function (params) {
+  // timestamp is optional
+  if (params.ts) {
+    params.ts = ' ' + params.ts;
+  } else {
+    params.ts = '';
+  }
+
+  // tags are also optional, but we need to pad accordingly if they're missing
+  if (params.tags && params.tags.length !== 0) {
+    params.tags = ',' + params.tags;
+  } else {
+    params.tags = '';
+  }
+
+  return (
+    escapeChars(MEASURE_REPLACERS, params.measurement) +
+    params.tags +
+    ' ' +
+    params.fields +
+    params.ts
+  );
 };
 
-module.exports = { format };
+exports.format = function format (measurement, fields, tags, ts) {
+  return generateLineProtocolString({
+    measurement: escapeChars(FIELD_TAG_REPLACERS, measurement),
+    tags: tags ? generateTagString(tags) : {},
+    fields: fields ? generateFieldString(fields): {},
+    ts: ts || process.hrtime.bigint()
+  });
+};
