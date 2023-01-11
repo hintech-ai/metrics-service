@@ -33,7 +33,9 @@ const getClient = () => {
           },
         };
 
-        const req = https.request(options, (res) => {});
+        const req = https.request(options, (res) => {
+          console.log(`metrics ${message} status: ${res.statusCode}`);
+        });
 
         req.on("error", (e) => {
           console.error(e);

@@ -50,15 +50,9 @@ const escapeString = function (str) {
   if (!str)
     return ""
   
-  return str
-    .split("")
-    .map(function (character) {
-      if (character === " " || character === ",") {
-        character = "\\" + character;
-      }
-      return character;
-    })
-    .join("");
+  str.replaceAll(' ', "\\ ").replaceAll(',', "\\,").replaceAll("\n", "")
+
+  return str;
 };
 
 module.exports = { format };
