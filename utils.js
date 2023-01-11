@@ -3,17 +3,47 @@
 
 var SPACE_REPLACER = [new RegExp(' ', 'gi'), '\\ '];
 var COMMA_REPLACER = [new RegExp(',', 'gi'), '\\,'];
+var QUOTE_REPLACER = [new RegExp('"', 'gi'), '\\"'];
+
+var ADD_QUOTES_START = [new RegExp('^', 'gi'), '"'];
+var ADD_QUOTES_END = [new RegExp('$', 'gi'), '"'];
+
+
 var EQUAL_REPLACER = [new RegExp('=', 'gi'), '\\='];
+var NL_REPLACER = [new RegExp("(?:\r\n|\r|\n)", 'gi'), ''];
+
 
 var FIELD_TAG_REPLACERS = [
   SPACE_REPLACER,
   COMMA_REPLACER,
-  EQUAL_REPLACER
+  EQUAL_REPLACER,
+  NL_REPLACER
+];
+
+var FIELD_STRING_REPLACERS = [
+  // SPACE_REPLACER,
+  COMMA_REPLACER,
+  EQUAL_REPLACER,
+  NL_REPLACER,
+  QUOTE_REPLACER,
+  ADD_QUOTES_START,
+  ADD_QUOTES_END,
+];
+
+var TAG_STRING_REPLACERS = [
+  SPACE_REPLACER,
+  COMMA_REPLACER,
+  EQUAL_REPLACER,
+  NL_REPLACER,
+  QUOTE_REPLACER,
+  ADD_QUOTES_START,
+  ADD_QUOTES_END,
 ];
 
 var MEASURE_REPLACERS = [
   SPACE_REPLACER,
-  COMMA_REPLACER
+  COMMA_REPLACER,
+  NL_REPLACER
 ];
 
 
@@ -25,7 +55,8 @@ var MEASURE_REPLACERS = [
  * @param  {String} input
  * @return {String}
  */
-function escapeChars (replacers, input) {
+function escapeChars(replacers, input) {
+  console.log([replacers, input])
   for (var r in replacers) {
     input = input.replace(replacers[r][0], replacers[r][1]);
   }
@@ -52,7 +83,9 @@ const generateTagString = function (data, keys) {
       ret +=
         escapeChars(FIELD_TAG_REPLACERS, keys[i]) +
         '=' +
-        escapeChars(FIELD_TAG_REPLACERS, data[keys[i]]) +
+      escapeChars(
+        (typeof data[keys[i]] === 'string' || data[keys[i]] instanceof String)
+          ? TAG_STRING_REPLACERS : [] , data[keys[i]]) +
         ',';
     }
 
@@ -79,7 +112,8 @@ const generateFieldString = function (data, keys) {
     for (var i in keys) {
       ret += escapeChars(FIELD_TAG_REPLACERS, keys[i]) +
         '=' +
-        data[keys[i]] +
+        escapeChars((typeof data[keys[i]] === 'string' || data[keys[i]] instanceof String)
+          ? FIELD_STRING_REPLACERS : [] , data[keys[i]]) +
         ',';
     }
 
@@ -124,7 +158,7 @@ const generateLineProtocolString = function (params) {
 
 exports.format = function format (measurement, fields, tags, ts) {
   return generateLineProtocolString({
-    measurement: escapeChars(FIELD_TAG_REPLACERS, measurement),
+    measurement: measurement,
     tags: tags ? generateTagString(tags) : {},
     fields: fields ? generateFieldString(fields): {},
     ts: ts || process.hrtime.bigint()
