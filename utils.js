@@ -32,9 +32,11 @@ const format = function (mesurement, fields, tags = {}, timestamp = undefined) {
   }
   escapeTags = esapedTagsArray.join(",");
 
+  timestamp = timestamp || process.hrtime.bigint();
+
   let data = `${mesurement}${
     escapeTags.length > 0 ? "," + escapeTags : ""
-  } ${escaped_fields_str}${timestamp ? " " + timestamp : ""}`;
+  } ${escaped_fields_str} ${timestamp}`;
 
   return data;
 };
