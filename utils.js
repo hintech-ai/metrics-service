@@ -56,7 +56,7 @@ var MEASURE_REPLACERS = [
  * @return {String}
  */
 function escapeChars(replacers, input) {
-  console.log([replacers, input])
+
   for (var r in replacers) {
     input = input.replace(replacers[r][0], replacers[r][1]);
   }

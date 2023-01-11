@@ -74,7 +74,7 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
   tags = { ...enrich, ...globalTags, ...tags };
 
   const message = format(mesurement, fields, tags, timestamp);
-  console.log(message);
+
   client(message);
 };
 
