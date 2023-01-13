@@ -44,6 +44,8 @@ const getClient = () => {
         req.write(message);
         req.end();
       };
+    } else {
+      console.error('No supported client')
     }
   }
 
