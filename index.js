@@ -61,6 +61,8 @@ const sendMetric = (mesurement, fields, tags = {}, timestamp) => {
     ...(process.env.APP_ENV && { APP_ENV: process.env.APP_ENV }),
     ...(process.env.HOSTNAME && { HOSTNAME: process.env.HOSTNAME }),
     ...(process.env.NODE_ENV && { NODE_ENV: process.env.NODE_ENV }),
+    ...(process.env.APP_NAME && { NODE_ENV: process.env.APP_NAME }),
+    ...(process.env.APP_INSTANCE && { NODE_ENV: process.env.APP_INSTANCE }),
   };
 
   const globalTags = Object.keys(process.env)

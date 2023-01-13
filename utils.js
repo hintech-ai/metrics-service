@@ -161,6 +161,6 @@ exports.format = function format (measurement, fields, tags, ts) {
     measurement: measurement,
     tags: tags ? generateTagString(tags) : {},
     fields: fields ? generateFieldString(fields): {},
-    ts: ts || process.hrtime.bigint()
+    ts: ts || (Date.now())+'000000'
   });
 };
